@@ -1,0 +1,19 @@
+Title: A Symbolic Evaluator For Core
+
+Speaker: Weixin
+
+Data & Time: Thursday,18 December, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+Symbolic execution is a program analysis technique which uses symbolic
+values rather than concrete values as program inputs. With symbolic
+values, all possible execution path of the program will be explored
+with all possible results expressed by symbolic values. Based on it,
+we can have better understanding of the program behaviour.
+
+In this talk, I will give an introduction about symbolic execution and
+SMT solver. Then, I will demonstrate these ideas using the symbolic
+evaluator implemented for our compiler.

@@ -1,0 +1,35 @@
+Title: How I Learned to Stop Worrying and Love Delegation
+
+Speaker: George
+
+Date & Time: September 25, 2014, Thursday, 2:00 pm
+
+Venue: CB 328
+
+Abstract:
+
+Prototype-based programming is one of the two major styles of
+object-oriented programming, the other being class-based programming
+which is featured in languages such as Java and C#. It has gained
+increasing popularity recently with the prominence of JavaScript in
+web applications. Prototype-based programming supports highly dynamic
+behaviors at run time that are not possible with traditional
+class-based programming. However, despite its flexibility,
+prototype-based programming is often criticized over concerns of
+correctness and safety. Furthermore, almost all prototype-based
+systems rely on the fact that the language is dynamically typed and
+interpreted.
+
+We propose a novel system that combines prototype-based programming
+with static typing. Therefore, it enjoys both the flexibility of
+prototype-based programming and the safety of statically typed
+languages. The new system is built on top of a superset of System
+F. We will see how various features in object-oriented programming,
+such as inheritance, subtyping, delegation, and dynamic dispatch, can
+be encoded in the core language.
+
+In this talk, we will also see this new system can address the
+following two problems: (1) inspecting into a complex or deeply nested
+data structure, which motivates the lens library in Haskell; (2) the
+"loss of information" problem, which motivates row polymorphism in
+OCaml.

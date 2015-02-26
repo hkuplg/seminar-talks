@@ -1,0 +1,23 @@
+Title: Unboxing with IFOs
+
+Speaker: Tomas
+
+Data & Time: Thursday,22 January, 2015 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+OO VM platforms, such as JVM or .NET, distinguish between primitive
+(value) types and reference types for their memory management. In
+Java, generics were added later to the language. For compatibility
+reasons, they are implemented as a compile-time trick and only work
+with reference types. If one uses primitive types (long, char,
+boolean, …) in a generic context, their values are automatically
+“boxed” in an Object (Long, Character, Boolean, …). This incurs a
+significant performance penalty for several reasons. Unfortunately,
+generics or reference types are needed to encode polymorphism when one
+implements a functional language on top of JVM. In this talk, we will
+discuss two approaches how to tackle this problem, specialization and
+mini-boxing. Finally, we will outline our new approach how to tackle
+this problem with our function encoding.

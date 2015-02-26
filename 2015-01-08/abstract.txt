@@ -1,0 +1,19 @@
+Title: The Expression Problem, Continued
+
+Speaker: Yanlin
+
+Data & Time: Thursday, 8 January, 2015 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+As the title says, this talk is an extension of my last seminar talk,
+"The Expression Problem". In the last talk, we identified two problems
+of the naive solution, namely, (1) the name problem (2) the casting
+problem. Using Java’s support for covariant return types, we have
+solved problem (2). In this talk, we will be exploring how to solve
+problem (1) using nested components. Then based on this solution, we
+will go deeper about family polymorphism and more extensibility this
+solution gives. We will also briefly discuss a set of sub-problems
+that go beyond Wadler’s original Expression Problem.

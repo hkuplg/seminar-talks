@@ -1,0 +1,21 @@
+Title: Property-based Testing in Haskell
+
+Speaker: Weixin
+
+Data & Time: Thursday,30 October, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+Property-based testing is the state-of-the-art testing technology
+provided by many programming languages. Without specifying particular
+test data, tests are in the form of assertions about logical
+properties that a function should meet. Then the test tool will
+generates random test data to falsify these assertions at
+runtime. This technology is originated in QuickCheck, a combinator
+library written in Haskell. In the first half of this talk, we will
+give a brief introduction to QuickCheck, including how to write
+properties and data generators. In the second half, we will discuss
+its advantages and disadvantages and the latest development of
+property-based testing in Haskell.

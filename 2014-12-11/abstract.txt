@@ -1,0 +1,24 @@
+Title: What makes our compiler fast
+
+Speaker: Jeremy
+
+Data & Time: Thursday, 11 December, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+In this talk, we will have a close look at one of the optimization
+techniques in our compiler, namely apply-opt.
+
+First we will see the motivation behind apply-opt, and why it is
+essential (and challenging) to make a practical compiler. Also we will
+look at the original non-solution that we adopted before and explain
+why it doesn't work for some programs. Then I will introduce a
+runtime-check solution that perfectly solves part of the problem while
+incurring a little bit overhead. In the later part of the talk, I will
+propose anther potential solution that deals with the other part of
+the problem (which is about overriding fields), and have a discussion
+with the audience about other possible solutions. Finally, I will
+conclude with our contributions and briefly talk about other related
+work.

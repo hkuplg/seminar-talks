@@ -1,0 +1,15 @@
+Title: Expression Problem: A New Solution
+
+Speaker: Yanlin
+
+Data & Time: Thursday, 6 November, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+The topic is expression problem and a new solution. First Yanlin will
+explain what is expression problem and introduce the requirements for
+a possible solution. Then we will be coding together to find out the
+solution. If time allows, there’ll also be some explanations of
+covariant return types in Java.

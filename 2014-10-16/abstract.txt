@@ -1,0 +1,28 @@
+Title: SPLASH 2014 Info and Practice Talks
+
+Speaker: Tomas
+
+Data & Time: Thursday,16 October, 2014 2:00 pm
+
+Venue: CB 313
+
+Abstract:
+
+Tomas is going to a conference soon, so the order was a bit
+shuffled. This seminar will have three parts: 1) General information
+about the conference, the most famous speakers, top 5 papers (we may
+discuss some of them at later seminars), and other highlights. 2)
+Practice Talk 1: A two-minute overview stating the most critical
+issues of the research (the “elevator talk”) + your feedback, 3)
+Practice Talk 2: A separate (strictly-timed) 40-minute description of
+the proposer’s research. This will be broken down into at most 25
+minutes of presentation and 15 minutes of questions + your feedback.
+
+This is the abstract for the practice talks: Traditional programming
+language namespaces evolved from filesystem structures. We describe
+different scenarios where this rigid code organization becomes a
+limiting factor. After that, we propose a more flexible code
+organization using tags. We then illustrate it on Python, including
+how we can convert existing code structures to the new tag-based
+one. Finally, we discuss our plans how to extend this work to
+statically typed languages in the future.

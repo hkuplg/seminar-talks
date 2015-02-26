@@ -1,0 +1,28 @@
+Title: An introduction to the implementation of Object Algebras
+
+Speaker: Haoyuan
+
+Data & Time: October 9, 2014, Thursday, 2:00 pm
+
+Venue: CB 313
+
+Abstract:
+
+A nice solution to the "Expression Problem" can meet the requirements
+in programming languages, including the extensibility in both adding
+new data types and new operations without modifying the existing code,
+holding type safety and so on. A novel solution, based on object
+algebras, was proposed in Bruno's paper (ECOOP 2012) showing its
+advantages as well as the implementation in various programming
+languages. Although existing languages are not sufficient to deal with
+object algebras specifically, it could be easily implemented in
+functional languages like Haskell with its type classes. Whereas in
+Java, a lot of interfaces and inheritance are required.
+
+Our research recently focuses on the implementation of object algebras
+in Java in a specific way. It allows to generate the "ugly" code for
+interfaces automatically by annotations in Java reflection. Currently
+we have queries and transformations based on the traversal by monoids
+and the visitor pattern. We will see how it works to deal with the
+algebras as well as the combinations, and how it saves a lot of work
+from the users.

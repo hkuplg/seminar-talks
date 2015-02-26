@@ -1,0 +1,19 @@
+Title: Extensibility with F2J
+
+Speaker: George
+
+Data & Time: Thursday,29 January, 2015 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+At the core of F2J is a language known as System FI, which is just a
+light-weight extension of System F. Simple as it seems, the type
+system is enough for employing various extensible designs that are
+sometimes clumsy to use even in those existing languages with a
+sophisticated type system. For example, it is able to solve the
+limitations of using object algebras in Java and Scala. Moreover, the
+type system allows even improvements on those designs. In this talk, I
+will show you what F2J has provided us in terms of the ease of
+programming.

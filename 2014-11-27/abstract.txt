@@ -1,0 +1,23 @@
+Title: Elaborating a lazy language to a strict one
+
+Speaker: George
+
+Data & Time: Thursday,27 November, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+Call by name is a lazy evaluation strategy in which arguments to a
+function are not evaluated when the function is called. Rather, they
+are only evaluated when they appear inside the function body. Call by
+name is supported in Haskell and Scala and is useful in encoding
+control structures such as `if` and `while`.
+
+Although the core language of F2J sticks only with call by value, it
+is possible to add the call by name feature at the source level as
+long as the a translation from the source language to the core
+language is semantics-preserving. In this talk, I will show you
+exactly some preliminary results on how to do that. In addition, I
+will show how to translate the generalised cases of laziness, such as
+lazy tuples and lazy records (à la Haskell) into a strict language.

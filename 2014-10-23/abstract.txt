@@ -1,0 +1,33 @@
+Title: From λ calculus to a fully fledged programming language
+
+Speaker: Jeremy
+
+Data & Time: Thursday,23 October, 2014 2:00 pm
+
+Venue: CB 313
+
+Abstract:
+
+Jeremy is always fascinated with λ calculus, but never had a chance to
+wrap his head around it. In this talk, he wants to build a fully
+fledged programming language based on the pure untyped λ calculus from
+scratch, by which he means:
+
+1. It should have numbers, booleans.
+2. It should support basic arithmetic operations, including addition,
+    subtraction and multiplication.
+3. It should have if-then-else construct (it actually comes for free
+    from church encoding booleans)
+4. It should have some non-trivial data structures like pairs, lists.
+5. It should support recursion!
+
+Jeremy will use one of his favorite language Racket (the other being
+Haskell of course) for implementation.
+
+In the second half, Jeremy also wants to mention how λ calculus
+relates to Turing Machine, or put it in another way, how they are
+equivalent in power by showing a proof of the halting problem using
+function application.
+
+(This talk are solely based on Jeremy's notes of studying TAPL and
+other interesting blogs)

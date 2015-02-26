@@ -1,0 +1,723 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>From λ calculus to a fully fledged programming language</title>
+<!-- 2014-10-23 Thu 15:45 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Jeremy" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">From λ calculus to a fully fledged programming language</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Abstract</a></li>
+<li><a href="#sec-2">2. Slides begin</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Title Slide&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-2">2.2. What is λ Calculus&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a>
+<ul>
+<li><a href="#sec-2-2-1">2.2.1. Basics&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-2-2">2.2.2. Semantics&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+</ul>
+</li>
+<li><a href="#sec-2-3">2.3. A minimal language&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a>
+<ul>
+<li><a href="#sec-2-3-1">2.3.1. Curry and Uncurry&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-3-2">2.3.2. Church Booleans&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-3-3">2.3.3. Church Numbers&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-3-4">2.3.4. Lists&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-3-5">2.3.5. Recursion&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+</ul>
+</li>
+<li><a href="#sec-2-4">2.4. Relation with Turing Machine&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a>
+<ul>
+<li><a href="#sec-2-4-1">2.4.1. Halting Problem&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+</ul>
+</li>
+<li><a href="#sec-2-5">2.5. References&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+<li><a href="#sec-2-6">2.6. Conclusions&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+<a href="(progn%20(require%20'org-show)%20(bind-key%20"C-c%20C-x"%20'org-show-mode%20org-mode-map))">code</a>
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Abstract</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Title: From λ calculus to a fully fledged programming language
+</p>
+
+<p>
+Speaker: Jeremy
+</p>
+
+<p>
+Data &amp; Time: Thursday,24 October, 2014 2:00 pm
+</p>
+
+<p>
+Venue: CB 313
+</p>
+
+<p>
+Abstract:
+</p>
+
+<p>
+Jeremy is always fascinated with λ calculus, but never had a chance to
+wrap his head around it. In this talk, he wants to build a fully
+fledged programming language based on the pure untyped λ calculus from
+scratch, by which he means:
+</p>
+
+<ol class="org-ol">
+<li>It should have numbers, booleans.
+</li>
+<li>It should support basic arithmetic operations, including addition,
+subtraction and multiplication.
+</li>
+<li>It should have if-then-else construct (it actually comes for free
+from church encoding booleans)
+</li>
+<li>It should have some non-trivial data structures like pairs, lists.
+</li>
+<li>It should support recursion!
+</li>
+</ol>
+
+<p>
+Jeremy will use one of his favorite language Racket (the other being
+Haskell of course) for implementation.
+</p>
+
+<p>
+In the second half, Jeremy also wants to mention how λ calculus
+relates to Turing Machine, or put it in another way, how they are
+equivalent in power by showing a proof of the halting problem using
+function application.
+</p>
+
+<p>
+(This talk are solely based on Jeremy's notes of studying TAPL and
+other interesting blogs)
+</p>
+
+<p>
+J.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Slides begin</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Title Slide&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h3>
+<div class="outline-text-3" id="text-2-1">
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp-slide">(org-show-animate '("From λ Calculus to Programming Languages" "" "Jeremy"))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> What is λ Calculus&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Quote from Wikipedia: λ-calculus is a formal system in mathematical logic and computer science for expressing computation based on function abstraction and application using variable binding and substitution. It was first formulated by Alonzo Church in the right window.
+</p>
+
+
+<div class="figure">
+<p><img src="./Alonzo_Church.png" alt="Alonzo_Church.png" />
+</p>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="outline-container-sec-2-2-1" class="outline-4">
+<h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> Basics&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+It consists of three kinds of terms defined inductively:
+</p>
+
+<ol class="org-ol">
+<li>x
+</li>
+<li>λx. t
+</li>
+<li>t1 t2
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2-2" class="outline-4">
+<h4 id="sec-2-2-2"><span class="section-number-4">2.2.2</span> Semantics&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+No built-in constants or primitive operations.
+</p>
+
+<p>
+The only thing we can do is the application of functions to arguments
+</p>
+
+<p>
+<span class="underline">(λx. t1) t2 &#x2013;&gt; [x -&gt; t2] t1</span>
+</p>
+
+<pre class="example">
+    (λx. x) (λz. (λx. x) z)
+--&gt; id (λz. id z)
+--&gt; id (λz. z)
+--&gt; λz. z
+--&gt; id
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> A minimal language&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Actually λ calculus is much more powerful than its definition might suggest.
+</p>
+
+<p>
+We can have boolean values, numbers, primitive operations, compound data structures, and so on.
+</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="outline-container-sec-2-3-1" class="outline-4">
+<h4 id="sec-2-3-1"><span class="section-number-4">2.3.1</span> Curry and Uncurry&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-3-1">
+<p>
+Encoding multiple arguments is easy, just use high-order functions.
+</p>
+
+<dl class="org-dl">
+<dt> Curry </dt><dd>λ (x,y,z). s &#x2013;&gt; λx. λy. λz. s
+</dd>
+<dt> Uncurry </dt><dd>λx. λy. λz. s &#x2013;&gt; λ (x,y,z). s
+</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3-2" class="outline-4">
+<h4 id="sec-2-3-2"><span class="section-number-4">2.3.2</span> Church Booleans&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-3-2">
+<p>
+What's the essence of boolean values?
+</p>
+
+<p>
+They perform branching between two computations (without evaluating them).
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">TRUE</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>l r<span style="color: #D0BF8F;">)</span> l<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">FALSE</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>l r<span style="color: #D0BF8F;">)</span> r<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">IF</span> b m n<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>b m n<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>IF FALSE 1 2<span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">AND</span> b1 b2<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>b1 b2 FALSE<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">OR</span> b1 b2<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>b1 TRUE b2<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">NOT</span> b<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>b FALSE TRUE<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>IF <span style="color: #BFEBBF;">(</span>OR TRUE FALSE<span style="color: #BFEBBF;">)</span> 1 2<span style="color: #DCDCCC;">)</span>
+1
+2
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3-3" class="outline-4">
+<h4 id="sec-2-3-3"><span class="section-number-4">2.3.3</span> Church Numbers&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-3-3">
+<p>
+Encoding numbers in λ calculus is slightly more complex. Again, in church encoding, we represent everything in the form of the computation that use it.
+</p>
+
+<p>
+One way to encode the number <b>n</b> is to think of some function <b>s</b>, applying, <b>n</b> times, to some argument <b>z</b>.
+</p>
+
+<p>
+So&#x2026;
+</p>
+
+<pre class="example">
+c0 = λs. λz. z
+c1 = λs. λz. s z
+c2 = λs. λz. s (s z)
+...
+</pre>
+
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">n-apply</span> n s z<span style="color: #BFEBBF;">)</span>
+  <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #D0BF8F;">(</span>= n 0<span style="color: #D0BF8F;">)</span> z
+      <span style="color: #D0BF8F;">(</span>n-apply <span style="color: #93E0E3;">(</span>- n 1<span style="color: #93E0E3;">)</span> s <span style="color: #93E0E3;">(</span>s z<span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">n2cn</span> n<span style="color: #BFEBBF;">)</span>
+  <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>s<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #93E0E3;">(</span>z<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span>n-apply n s z<span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">zero</span> <span style="color: #BFEBBF;">(</span>n2cn 0<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">one</span> <span style="color: #BFEBBF;">(</span>n2cn 1<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">two</span> <span style="color: #BFEBBF;">(</span>n2cn 2<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">plus1</span> n<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>+ 1 n<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">cn2n</span> n<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span><span style="color: #D0BF8F;">(</span>n plus1<span style="color: #D0BF8F;">)</span> 0<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>n2cn 10<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+10
+3
+
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">is-zero?</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>n<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span><span style="color: #93E0E3;">(</span>n <span style="color: #9FC59F;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #94BFF3;">(</span>_<span style="color: #94BFF3;">)</span> FALSE<span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span> TRUE<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>IF <span style="color: #BFEBBF;">(</span>is-zero? one<span style="color: #BFEBBF;">)</span> 1 2<span style="color: #DCDCCC;">)</span>
+</pre>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<ol class="org-ol"><li><a id="sec-2-3-3-1" name="sec-2-3-3-1"></a>Addition&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span><br  /><div class="outline-text-5" id="text-2-3-3-1">
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">SUCC</span> cn<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>s<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #93E0E3;">(</span>z<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span>s <span style="color: #9FC59F;">(</span><span style="color: #94BFF3;">(</span>cn s<span style="color: #94BFF3;">)</span> z<span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>SUCC <span style="color: #D0BF8F;">(</span>n2cn 5<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+6
+4
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">PLUS</span> n m<span style="color: #BFEBBF;">)</span>
+  <span style="color: #5F7F5F;">;; </span><span style="color: #7F9F7F;">use succ</span>
+  <span style="color: #BFEBBF;">(</span><span style="color: #D0BF8F;">(</span>n SUCC<span style="color: #D0BF8F;">)</span> m<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>PLUS <span style="color: #D0BF8F;">(</span>n2cn 9<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>n2cn 4<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+13
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">PLUS2</span> n m<span style="color: #BFEBBF;">)</span>
+  <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>s<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #93E0E3;">(</span>z<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span><span style="color: #9FC59F;">(</span>n s<span style="color: #9FC59F;">)</span> <span style="color: #9FC59F;">(</span><span style="color: #94BFF3;">(</span>m s<span style="color: #94BFF3;">)</span> z<span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>PLUS2 <span style="color: #D0BF8F;">(</span>n2cn 3<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>n2cn 12<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+15
+7
+12
+</pre>
+</div>
+</div>
+</li>
+<li><a id="sec-2-3-3-2" name="sec-2-3-3-2"></a>Multiplication&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span><br  /><div class="outline-text-5" id="text-2-3-3-2">
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">MUL</span> n m<span style="color: #BFEBBF;">)</span>
+  <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>s<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #93E0E3;">(</span>z<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span><span style="color: #9FC59F;">(</span>n <span style="color: #94BFF3;">(</span>m s<span style="color: #94BFF3;">)</span><span style="color: #9FC59F;">)</span> z<span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>MUL <span style="color: #D0BF8F;">(</span>n2cn 3<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>n2cn 20<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+60
+12
+</pre>
+</div>
+</div>
+</li>
+
+
+<li><a id="sec-2-3-3-3" name="sec-2-3-3-3"></a>What about subtraction?&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span><br  /><div class="outline-text-5" id="text-2-3-3-3">
+<p>
+Implementing subtraction is a little bit tricky. Recall that a church number <b>n</b> means to apply <b>n</b> times, how can we get a church number <b>m</b> that apply just one time less than <b>n</b>?
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">pair</span> n m<span style="color: #BFEBBF;">)</span>
+  <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>b<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>b n m<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">fst</span> p<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>p TRUE<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">snd</span> p<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span>p FALSE<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>fst <span style="color: #BFEBBF;">(</span>pair 2 3<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+2
+
+<span style="color: #DCDCCC;">(</span>snd <span style="color: #BFEBBF;">(</span>pair 4 9<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+9
+5
+</pre>
+</div>
+
+
+<p>
+With pairs, let's encode a "predecessor" function&#x2026;
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">zz</span> <span style="color: #BFEBBF;">(</span>pair zero zero<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">ss</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>p<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>pair <span style="color: #93E0E3;">(</span>snd p<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span>SUCC <span style="color: #9FC59F;">(</span>snd p<span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">PRED</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>cn<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>fst <span style="color: #93E0E3;">(</span><span style="color: #9FC59F;">(</span>cn ss<span style="color: #9FC59F;">)</span> zz<span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>PRED <span style="color: #D0BF8F;">(</span>n2cn 12<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+11
+2
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #BFEBBF;">(</span><span style="color: #93E0E3;">SUB</span> n m<span style="color: #BFEBBF;">)</span> <span style="color: #BFEBBF;">(</span><span style="color: #D0BF8F;">(</span>m PRED<span style="color: #D0BF8F;">)</span> n<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>cn2n <span style="color: #BFEBBF;">(</span>SUB <span style="color: #D0BF8F;">(</span>n2cn 9<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span>n2cn 3<span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+6
+2
+</pre>
+</div>
+</div>
+</li></ol>
+</div>
+
+<div id="outline-container-sec-2-3-4" class="outline-4">
+<h4 id="sec-2-3-4"><span class="section-number-4">2.3.4</span> Lists&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-3-4">
+<p>
+A list can be represented by the <b>fold</b> function because of its recursive definition.
+</p>
+
+<pre class="example">
+[] --&gt; λc. λn. n
+[x] --&gt; λc. λn. c x n
+[y,x] --&gt; λc. λn. c y (c x n)
+[z,y,x] --&gt; λc. λn. c z (c y (c x n))
+</pre>
+
+
+<pre class="example">
+[] = λc. λn. n
+is-nil? = λl. (l (λx. λy. FALSE) TRUE)
+head = λl. (l TRUE FALSE)
+cons = λh. λl. (λc. λn. (c h (l c n)))
+zz = (pair [] [])
+ss = λe. λp. (pair (snd p) (cons e (snd p)))
+tail = λl. (l ss zz)
+</pre>
+</div>
+</div>
+<div id="outline-container-sec-2-3-5" class="outline-4">
+<h4 id="sec-2-3-5"><span class="section-number-4">2.3.5</span> Recursion&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-3-5">
+<p>
+This is my favorite part of λ calculus.
+</p>
+
+<p>
+Behold, this is <span class="underline">omega</span> combinator:
+</p>
+
+<pre class="example">
+omega = (λx. x x) (λx. x x)
+</pre>
+
+<p>
+If you evaluate <span class="underline">omega</span>, it give again <span class="underline">omega</span> itself.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-scheme"><span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">Y</span> <span style="color: #BFEBBF;">(</span><span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">&#955;</span> <span style="color: #93E0E3;">(</span>y<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span><span style="color: #F0DFAF; font-weight: bold;">&#955;</span> <span style="color: #9FC59F;">(</span>F<span style="color: #9FC59F;">)</span> <span style="color: #9FC59F;">(</span>F <span style="color: #94BFF3;">(</span><span style="color: #F0DFAF; font-weight: bold;">&#955;</span> <span style="color: #E0CF9F;">(</span>x<span style="color: #E0CF9F;">)</span> <span style="color: #E0CF9F;">(</span><span style="color: #8FB28F;">(</span><span style="color: #6CA0A3;">(</span>y y<span style="color: #6CA0A3;">)</span> F<span style="color: #8FB28F;">)</span> x<span style="color: #E0CF9F;">)</span><span style="color: #94BFF3;">)</span><span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span>
+           <span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">&#955;</span> <span style="color: #93E0E3;">(</span>y<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span><span style="color: #F0DFAF; font-weight: bold;">&#955;</span> <span style="color: #9FC59F;">(</span>F<span style="color: #9FC59F;">)</span> <span style="color: #9FC59F;">(</span>F <span style="color: #94BFF3;">(</span><span style="color: #F0DFAF; font-weight: bold;">&#955;</span> <span style="color: #E0CF9F;">(</span>x<span style="color: #E0CF9F;">)</span> <span style="color: #E0CF9F;">(</span><span style="color: #8FB28F;">(</span><span style="color: #6CA0A3;">(</span>y y<span style="color: #6CA0A3;">)</span> F<span style="color: #8FB28F;">)</span> x<span style="color: #E0CF9F;">)</span><span style="color: #94BFF3;">)</span><span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">g</span> <span style="color: #BFEBBF;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #D0BF8F;">(</span>fac<span style="color: #D0BF8F;">)</span> <span style="color: #D0BF8F;">(</span><span style="color: #F0DFAF; font-weight: bold;">lambda</span> <span style="color: #93E0E3;">(</span>x<span style="color: #93E0E3;">)</span> <span style="color: #93E0E3;">(</span><span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #9FC59F;">(</span>= x 0<span style="color: #9FC59F;">)</span>
+                              1
+                              <span style="color: #9FC59F;">(</span>* x <span style="color: #94BFF3;">(</span>fac <span style="color: #E0CF9F;">(</span>- x 1<span style="color: #E0CF9F;">)</span><span style="color: #94BFF3;">)</span><span style="color: #9FC59F;">)</span><span style="color: #93E0E3;">)</span><span style="color: #D0BF8F;">)</span><span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span><span style="color: #F0DFAF; font-weight: bold;">define</span> <span style="color: #93E0E3;">factorial</span> <span style="color: #BFEBBF;">(</span>Y g<span style="color: #BFEBBF;">)</span><span style="color: #DCDCCC;">)</span>
+
+<span style="color: #DCDCCC;">(</span>factorial 10<span style="color: #DCDCCC;">)</span>
+3628800
+24
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Relation with Turing Machine&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+They are equivalent in power!
+</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="outline-container-sec-2-4-1" class="outline-4">
+<h4 id="sec-2-4-1"><span class="section-number-4">2.4.1</span> Halting Problem&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h4>
+<div class="outline-text-4" id="text-2-4-1">
+<p>
+"Does there exists a magical program A, that given any program B and input c, A can tell whether B will finish running on c, or run forever."
+</p>
+
+<div class="definition">
+<p>
+    Accept(M,w)
+&#x2013;&gt; If M(w) = True, then Accept(M,w) returns True, otherwise False
+</p>
+
+<p>
+F = Accept(λm. not(Accept(m,m)), λm. not(Accept(m,m))), True or False?
+</p>
+
+</div>
+
+<ul class="org-ul">
+<li>If F is True
+</li>
+</ul>
+<p>
+&#x2013;&gt; (λm. not(Accept(m,m))) (λm. not(Accept(m,m))) = True
+&#x2013;&gt; not(Accept(λm.not(Accept(m,m)), λm.not(Accept(m,m)))) = True
+&#x2013;&gt; not F = True
+&#x2013;&gt; F = False
+</p>
+
+<ul class="org-ul">
+<li>If F is false&#x2026;
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> References&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h3>
+<div class="outline-text-3" id="text-2-5">
+<ol class="org-ol">
+<li><a href="http://www.cis.upenn.edu/~bcpierce/tapl/">Types and Programming Languages</a>
+</li>
+<li><a href="http://matt.might.net/articles/compiling-up-to-lambda-calculus/">Compiling to lambda-calculus: Turtles all the way down</a>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Conclusions&#xa0;&#xa0;&#xa0;<span class="tag"><span class="slide">slide</span></span></h3>
+<div class="outline-text-3" id="text-2-6">
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp-slide">(org-show-animate '("That's the end of my talk." "Thank you for your attention!"))
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Jeremy</p>
+<p class="date">Created: 2014-10-23 Thu 15:45</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

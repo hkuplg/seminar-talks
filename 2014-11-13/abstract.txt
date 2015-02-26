@@ -1,0 +1,14 @@
+Title: f2ji -- REPL for f2j
+
+Speaker: Emma
+
+Data & Time: Thursday,13 November, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+I'll first briefly introduce how the REPL is built. Then I'll
+introduce and present current features of the REPL, and then briefly
+talk about how some of its infrastructure can be conveniently used to
+potentially enhance the performance of program testing

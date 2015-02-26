@@ -1,0 +1,22 @@
+Title: FCore: Secrets of the backend compiler
+
+Speaker: Tomas
+
+Data & Time: Thursday,20 November, 2014 2:00 pm
+
+Venue: CB 313
+
+Abstract:
+
+Last week, we submitted a paper about the representation of functions
+and optimizations used in our compiler backed. It forced us to
+motivate and explain it in (hopefully) a clear way with examples and
+corrected formalization, evaluate it in experiments and relate it to
+other people’s work.
+
+So, this week’s seminar will be about that. In other words, I will
+repeat some things about the backend from my first seminar, but if you
+struggled to understand it back then or forgot it, this seminar will
+hopefully clear out any remaining confusion.  I will also discuss some
+future work plans which will connect with this week’s compiler
+meeting.

@@ -1,0 +1,24 @@
+Title: Exploring lambdas in Java 8 & transformations in object algebras
+
+Speaker: Haoyuan
+
+Data & Time: Thursday, 4 December, 2014 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+Some new features are introduced in Java 8, of which lambda
+expressions play an important role. While we are writing pure OO-style
+programs, the lambda syntax and functional interfaces provide a more
+concise way, just like those in functional languages. Lambda
+expressions, as anonymous objects, as return values, can be placed
+everywhere. As the first part of the talk, the introduction to lambdas
+is primary yet necessary before we discuss transformation algebras in
+this style of Java.
+
+After that, as an extension of my last talk, "Object algebras with
+Java annotations", we will focus mainly on transformation algebras of
+two types, namely non-contextual and contextual, implemented with
+different approaches. To make it easier to understand, some examples
+will be available during discussion.
