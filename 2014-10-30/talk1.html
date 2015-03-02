@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Weixin Zhang" />
+  <title>Property-based Testing in Haskell</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Property-based Testing in Haskell</h1>
+  <p class="author">
+Weixin Zhang
+  </p>
+</div>
+<div id="a-first-galance-at-property-based-testing" class="slide section level1">
+<h1>a First Galance at Property-based Testing</h1>
+<h3 id="an-example-in-quickcheck">An example in QuickCheck:</h3>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">prop_reverse ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+prop_reverse xs <span class="fu">=</span> reverse (reverse xs) <span class="fu">==</span> xs</code></pre>
+<ul>
+<li><p>No test cases</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- What we usually do in HUnit:</span>
+<span class="dt">TestCase</span> (assertEqual [] (reverse []))
+<span class="dt">TestCase</span> (assertEqual [<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>] (reverse [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]))
+<span class="fu">...</span></code></pre></li>
+<li><p>Just assertions</p>
+<p><code class="sourceCode haskell">reverse (reverse xs) <span class="fu">==</span> xs</code></p></li>
+<li><p>Plus type signatures</p>
+<p><code class="sourceCode haskell"><span class="ot">prop_reverse ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></p></li>
+</ul>
+</div>
+<div id="introduction-to-quickcheck" class="slide section level1">
+<h1>Introduction to QuickCheck</h1>
+<ul>
+<li><p>Define a property</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Test.QuickCheck</span>
+<span class="ot">prop_revapp ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+prop_revapp xs ys <span class="fu">=</span> reverse (xs <span class="fu">++</span> ys) <span class="fu">==</span> reverse xs <span class="fu">++</span> reverse ys</code></pre></li>
+<li><p>Verify a property</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">quickCheck ::</span> (<span class="dt">Testable</span> prop) <span class="ot">=&gt;</span> prop <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</code></pre>
+<pre><code>λ&gt; quickCheck prop_revapp
+*** Failed! Falsifiable (after 4 tests and 4 shrinks):
+[0]
+[1]</code></pre></li>
+<li><p>Conditional Properties</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(==&gt;) ::</span> <span class="dt">Testable</span> prop <span class="ot">=&gt;</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> prop <span class="ot">-&gt;</span> <span class="dt">Property</span></code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">prop_revhead xs <span class="fu">=</span> not null xs <span class="fu">==&gt;</span> head xs <span class="fu">==</span> last (reverse xs)
+prop_revlast xs <span class="fu">=</span> not null xs <span class="fu">==&gt;</span> last xs <span class="fu">==</span> head (reverse xs)</code></pre>
+<blockquote>
+<p><code>Property</code> is also an instance of <code>Testable</code></p>
+</blockquote></li>
+</ul>
+</div>
+<div id="generate-test-data" class="slide section level1">
+<h1>Generate Test Data</h1>
+<ul>
+<li><p>Datatype <code>Gen</code></p>
+<blockquote>
+<p>The magic of randomness comes from Gen <em>Monad</em>!</p>
+</blockquote></li>
+<li><p>Typeclass <code>Aribitrary</code></p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Arbitrary</span> a <span class="kw">where</span>
+<span class="ot">    arbitrary ::</span> <span class="dt">Gen</span> a</code></pre>
+<p>Int, Boolean, [] ... are already defined as instances of <code>Arbitrary</code></p>
+<p><code>λ&gt; sample' (arbitrary :: Gen Int)</code></p>
+<ol style="list-style-type: decimal">
+<li>[0,0,1,4,-7,-23,-121,5,-817,887,3734]</li>
+<li>[1,1,-2,-7,5,32,-97,-236,-595,-114,-1526]</li>
+<li>...</li>
+</ol></li>
+</ul>
+</div>
+<div id="generate-test-data-cont." class="slide section level1">
+<h1>Generate Test Data (Cont.)</h1>
+<ul>
+<li><p>To let QuickCheck generate data for the types we defined, we should</p>
+<p>1) Make the <strong>type</strong> an instance of <code>Arbitrary</code> 2) Define <code>arbitrary</code> function</p></li>
+<li><p>Some useful Generator Combinators</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">choose ::</span> (<span class="dt">System.Random.Random</span> a) <span class="ot">=&gt;</span> (a, a) <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre>
+<p>choose one element from an interval randomly</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">elements ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre>
+<p>choose one element from a list randomly</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">oneof ::</span> [<span class="dt">Gen</span> a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre>
+<p>choose one of the given generators randomly</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">frequency ::</span> [(<span class="dt">Int</span>, <span class="dt">Gen</span> a)] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre>
+<p>choose one of the given generators with a weighted random distribution</p></li>
+</ul>
+</div>
+<div id="case-study-a-toy-arithmetic-language" class="slide section level1">
+<h1>Case Study: a Toy Arithmetic Language</h1>
+<ul>
+<li><p>ADT</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Expr</span> <span class="fu">=</span> <span class="dt">Num</span> <span class="dt">Int</span>
+          <span class="fu">|</span> <span class="dt">Add</span> <span class="dt">Expr</span> <span class="dt">Expr</span>
+          <span class="fu">|</span> <span class="dt">Div</span> <span class="dt">Expr</span> <span class="dt">Expr</span></code></pre></li>
+<li><p>Interpreter</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">eval ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
+eval (<span class="dt">Num</span> i) <span class="fu">=</span> <span class="dt">Just</span> i
+eval (<span class="dt">Add</span> a b) <span class="fu">=</span>
+    liftM2 (<span class="fu">+</span>) (eval a) (eval b)
+eval (<span class="dt">Div</span> a b) <span class="fu">=</span>
+    <span class="kw">let</span> b&#39; <span class="fu">=</span> eval b
+    <span class="kw">in</span> <span class="kw">if</span> b&#39; <span class="fu">==</span> <span class="dt">Just</span> <span class="dv">0</span>
+       <span class="kw">then</span> <span class="dt">Nothing</span>
+       <span class="kw">else</span> liftM2 div (eval a) b&#39;</code></pre></li>
+<li><p>Define generator</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Arbitrary</span> <span class="dt">Expr</span> <span class="kw">where</span>
+    arbitrary <span class="fu">=</span> oneof [ liftM  <span class="dt">Num</span> arbitrary
+                      , liftM2 <span class="dt">Add</span> arbitrary arbitrary
+                      , liftM2 <span class="dt">Div</span> arbitrary arbitrary
+                      ]</code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- import Control.Monad</span>
+<span class="ot">liftM  ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">Gen</span> b
+<span class="ot">liftM2 ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">Gen</span> b <span class="ot">-&gt;</span> <span class="dt">Gen</span> c</code></pre></li>
+</ul>
+</div>
+<div id="case-study-a-toy-arithmetic-language-cont." class="slide section level1">
+<h1>Case Study: a Toy Arithmetic Language (Cont.)</h1>
+<p><code>λ&gt; sample (arbitrary :: Gen Expr)</code></p>
+<ul>
+<li><p>Modified Generator</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Arbitrary</span> <span class="dt">Expr</span> <span class="kw">where</span>
+    arbitrary <span class="fu">=</span> sized arbExpr
+        <span class="kw">where</span> arbExpr n <span class="fu">=</span>
+                  <span class="kw">let</span> n&#39; <span class="fu">=</span> n <span class="ot">`div`</span> <span class="dv">2</span>
+                  <span class="kw">in</span> frequency [ (<span class="dv">1</span>, liftM <span class="dt">Val</span> arbitrary)
+                               , (n, liftM2 <span class="dt">Add</span> (arbExpr n&#39;) (arbExpr n&#39;))
+                               , (n, liftM2 <span class="dt">Div</span> (arbExpr n&#39;) (arbExpr n&#39;))
+                               ]</code></pre></li>
+<li><p>Define property</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">divisable ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+divisable (<span class="dt">Num</span> _) <span class="fu">=</span> <span class="dt">True</span>
+divisable (<span class="dt">Add</span> a b) <span class="fu">=</span> divisable a <span class="fu">&amp;&amp;</span> divisable b
+divisable (<span class="dt">Div</span> _ (<span class="dt">Num</span> <span class="dv">0</span>)) <span class="fu">=</span> <span class="dt">False</span>
+divisable (<span class="dt">Div</span> a b) <span class="fu">=</span> divisable a <span class="fu">&amp;&amp;</span> divisable b</code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">prop_div ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Property</span>
+prop_div e <span class="fu">=</span> divisable e <span class="fu">==&gt;</span> eval e <span class="fu">/=</span> <span class="dt">Nothing</span></code></pre></li>
+</ul>
+</div>
+<div id="pros-cons-of-quickcheck" class="slide section level1">
+<h1>Pros &amp; Cons of QuickCheck</h1>
+<ul>
+<li><p>Pros</p>
+<ol style="list-style-type: decimal">
+<li>Consice and precise</li>
+<li>Properties are stable</li>
+<li>Refactoring tool</li>
+</ol>
+<p><code>prop args = f args == f' args</code></p></li>
+<li><p>Cons</p>
+<ol style="list-style-type: decimal">
+<li><p>Type signature can be annoying</p>
+<p>Some properties are isolated from types</p>
+<ul>
+<li><code class="sourceCode haskell">reverse (reverse xs) <span class="fu">==</span> xs</code></li>
+</ul>
+<p>If eliminated, type is () by default</p>
+<ul>
+<li>Can cause false positive!. e.g., <code>reverse xs = xs</code></li>
+</ul></li>
+<li><p>Counter-examples can be <em>huge</em></p></li>
+<li><p>Conditional properties can be useless if the condition is hard to meet</p>
+<ul>
+<li>QuickCheck will timeout</li>
+<li>You need to redefine the generator to generate data that meet the condiftion</li>
+</ul></li>
+</ol></li>
+</ul>
+<blockquote>
+<p>Writing tests first forces you to think about the problem you're solving. Writing property-based tests forces you to think way harder.</p>
+</blockquote>
+<!-- ## Wait! If the condition is hard to meet... -->
+<!--  - Cons -->
+<!--    the ordered lists are *sparsely* distributed among random lists -->
+<!-- fun -->
+<!-- prop args = fun args == fun' args -->
+<!-- ## Motivation -->
+<!-- Code coverage is not guaranteed, -->
+<!-- Execution tree -->
+<!-- some path -->
+</div>
+<div id="the-development-of-property-based-testing-in-haskell" class="slide section level1">
+<h1>The Development of Property-based Testing in Haskell</h1>
+</div>
+<div id="smallcheck-and-lazy-smallcheck" class="slide section level1">
+<h1>SmallCheck and Lazy SmallCheck</h1>
+<h3 id="motivation">Motivation</h3>
+<blockquote>
+<p>If a program fails to meet its specification in some cases, it almost always fails in some simple case.</p>
+</blockquote>
+<h3 id="test-strategy">Test Strategy</h3>
+<ul>
+<li>Test all the finitely many values up to some depth
+<ul>
+<li><p>depth of construction for data values</p>
+<p>e.g.,</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Div</span> (<span class="dt">Add</span> (<span class="dt">Num</span> <span class="dv">1</span>) (<span class="dt">Num</span> <span class="dv">2</span>))) (<span class="dt">Int</span> <span class="dv">1</span>) <span class="co">-- depth 3</span></code></pre></li>
+</ul></li>
+<li>Increase the depth progressively</li>
+</ul>
+<h3 id="enhancements">Enhancements</h3>
+<ul>
+<li>Minimal counter-examples</li>
+<li>Add quantifiers
+<ol style="list-style-type: decimal">
+<li><span class="math">∀</span></li>
+<li><span class="math">∃</span></li>
+<li><span class="math">∃</span>! (unique)</li>
+</ol></li>
+</ul>
+<!-- # SmallCheck Cont. -->
+<!-- ## Come up with a Specification -->
+<!-- Assume we want to implement a **isPrefix** function -->
+<pre class="sourceCode haskell"><code class="sourceCode haskell">prop_prefix xs ys <span class="fu">=</span> isPrefix xs (xs<span class="fu">++</span>ys)</code></pre>
+<p><br /><span class="math">∀<em>x</em><em>s</em>∀ys(isPrefix xs ys ⇔ ∃xs’(xs++xs’ = ys)</span><br /></p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">prop_prefix&#39; xs ys <span class="fu">=</span>
+    isPrefix xs ys <span class="fu">==&gt;</span> exists <span class="fu">$</span> \xs&#39; <span class="ot">-&gt;</span> xs<span class="fu">++</span>xs&#39; <span class="fu">==</span> ys</code></pre>
+</div>
+<div id="smartcheck" class="slide section level1">
+<h1>SmartCheck</h1>
+<h3 id="motivation-1">Motivation</h3>
+<blockquote>
+<p>&quot;Sometimes the counterexamples found are very large and it is difficult to go back to the property and understand why it is a counterexample.&quot;</p>
+</blockquote>
+<ul>
+<li>Counter examples are extremely valuable for understanding why a property failed.</li>
+<li>If the counter-examples are complicated, they provide no useful information</li>
+</ul>
+<h3 id="approach">Approach</h3>
+<p>Top-down (bottom-up in smallcheck)</p>
+<ol style="list-style-type: decimal">
+<li>Find a counter-example using QuickCheck</li>
+<li>Shrink
+<ul>
+<li>do <span class="math">∀</span> generalization</li>
+<li>do <span class="math">∃</span> generalization</li>
+</ul></li>
+</ol>
+</div>
+<div id="smartcheck-cont." class="slide section level1">
+<h1>SmartCheck (Cont.)</h1>
+<pre><code>λ&gt; quickCheck prop_div
+*** Failed! Falsifiable (after 3 tests):
+Div (Div (Val (-2)) (Val (-2))) (Add (Add (Val (-2)) (Add (Val 2) (Add (Val (-2)) (Val (-2))))) (Add (Val (-1)) (Div (Add (Div (Val (-1)) (Val 2)) (Val 2)) (Add (Val (-1)) (Val 1)))))</code></pre>
+<pre><code>λ&gt; smartCheck scStdArgs prop_div
+...
+
+Div (Num 0) (Add (Num 0) (Num 0))
+
+...
+
+forall constructors C0:
+  there exist arguments x̅ s.t.
+
+Div
+|
++- C0
+|
+`- Add
+   |
+   +- Num
+   |  |
+   |  `- 0
+   |
+   `- Num
+      |
+      `- 0</code></pre>
+<!-- # Comparison between testing strategies -->
+<!-- - traditional testing -->
+<!--   - pros -->
+<!--    corner case -->
+<!--   - cons -->
+<!--    tedious: specifying test data is -->
+<!--    fragile: -->
+<!-- ``` -->
+<!--     y -->
+<!--    |   .       . -->
+<!--    | -->
+<!--     | .      . -->
+<!--    |_____________ x -->
+<!-- ``` -->
+<!-- ``` -->
+<!--     y -->
+<!--    |   .   .    . -->
+<!--    |   . .   .. . -->
+<!--     | . ..     .. -->
+<!--    |_____________ x -->
+<!-- ``` -->
+<!-- ``` -->
+<!--     y -->
+<!--    | -->
+<!--    | -->
+<!--     |------------ -->
+<!--    |_____________ x -->
+<!-- ``` -->
+<!-- # -->
+<!-- Existing property-based testing approaches are built upon -->
+</div>
+<div id="references" class="slide section level1">
+<h1>References</h1>
+<h3 id="lecture-notes">Lecture Notes</h3>
+<ul>
+<li><a href="http://www.seas.upenn.edu/~cis552/lectures/QuickCheck1.html">UPenn CIS552</a></li>
+</ul>
+<h3 id="book-chapter">Book Chapter</h3>
+<ul>
+<li>Real World Haskell <a href="http://book.realworldhaskell.org/read/testing-and-quality-assurance.html">Testing and quality assurance</a></li>
+</ul>
+<h3 id="papers">Papers</h3>
+<ul>
+<li><p><a href="http://dl.acm.org/citation.cfm?id=1988046">QuickCheck</a></p></li>
+<li><p><a href="http://dl.acm.org/citation.cfm?id=1411292">Smallcheck and Lazy smallcheck</a></p></li>
+<li><p><a href="http://dl.acm.org/citation.cfm?id=2633357.2633365&amp;coll=DL&amp;dl=ACM&amp;CFID=592090178&amp;CFTOKEN=85623856">SmartCheck</a></p></li>
+</ul>
+</div>
+</body>
+</html>

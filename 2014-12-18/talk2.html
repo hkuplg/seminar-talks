@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Weixin Zhang" />
+  <title>A Symbolic Evaluator for Core</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">A Symbolic Evaluator for Core</h1>
+  <p class="author">
+Weixin Zhang
+  </p>
+</div>
+<div id="quickcheck-review" class="slide section level1">
+<h1>Quickcheck Review</h1>
+<ul>
+<li>Property-based testing</li>
+<li>Generate randomized input according to the signature</li>
+<li>Report counter-example if failed</li>
+</ul>
+<blockquote>
+<p>Random testing is uniquely suited to revealing mistakes in the programmer’s conception of the program, since it can produce inputs you wouldn’t dream of on your own.</p>
+</blockquote>
+</div>
+<div id="the-weakness-of-quickcheck" class="slide section level1">
+<h1>The Weakness of QuickCheck</h1>
+<ul>
+<li>Black-box testing</li>
+</ul>
+<p>Generate test case blindly</p>
+<ul>
+<li>Low test coverage (100 test case by default)</li>
+</ul>
+<p>Though you can adjust the number of test cases generated. But is 1000 enough? or 10000?</p>
+<pre><code>.  test case
+
+      input space
+     _____________
+    |   .       . |
+    |    . .  .   |
+    | .      .    |
+    |_____________|
+</code></pre>
+</div>
+<div id="motivation" class="slide section level1">
+<h1>Motivation</h1>
+<p>Improve test coverage to expose bugs</p>
+</div>
+<div id="symbolic-execution" class="slide section level1">
+<h1>Symbolic Execution</h1>
+<blockquote>
+<p>&quot;symbolic execution (also symbolic evaluation) is a means of analyzing a program to determine what inputs cause each part of a program to execute&quot; -- Wikipedia</p>
+</blockquote>
+<ul>
+<li><p>Concrete execution: program takes only one execution path determined by input</p></li>
+<li><p>Symbolic execution: all possible execution path of the program will be explored</p></li>
+<li><p>Path Condition</p>
+<ul>
+<li>Logic formula over symbolic inputs</li>
+<li>Accumulates contraints</li>
+</ul></li>
+<li><p>Execution Tree</p>
+<ul>
+<li>Constructed during symbolic execution</li>
+<li>Edges are labeled with program transitions</li>
+<li>Nodes are condtions</li>
+<li>Leaves are results</li>
+</ul></li>
+</ul>
+</div>
+<div id="a-running-example" class="slide section level1">
+<h1>A Running Example</h1>
+<p>Symbolically execute the following program:</p>
+<pre><code>maximum (a : Int) (b : Int) (c : Int) : Int =
+  if a &gt; b
+  then if a &gt; c
+       then a
+       else c
+  else if b &gt; c
+       then b
+       else c</code></pre>
+<p>We will get the following execution tree.</p>
+<pre><code>        a&gt;b                 1. (a&gt;b) &amp;&amp; (a&gt;c) ==&gt; a
+     /       \              2. (a&gt;b) &amp;&amp; !(a&gt;c) ==&gt; c
+    a&gt;c      b&gt;c            3. !(a&gt;b) &amp;&amp; (b&gt;c) ==&gt; b
+   /   \    /   \           4. !(a&gt;b) &amp;&amp; !(b&gt;c) ==&gt; c
+  a     c  b     c
+</code></pre>
+</div>
+<div id="are-all-paths-feasible" class="slide section level1">
+<h1>Are All Paths Feasible?</h1>
+<p>Consider the modified example</p>
+<pre><code>maximum2 (a : Int) (b : Int) (c : Int) : Int =
+  if a &gt; b
+  then if a &gt; c
+       then a
+       else if b &gt; c
+            then -1
+            else c
+  else if b &gt; c
+       then b
+       else c</code></pre>
+<p>We will get the following execution tree:</p>
+<pre><code>        a&gt;b              1. (a&gt;b) &amp;&amp; (a&gt;c) ==&gt; a
+     /        \          2. (a&gt;b) &amp;&amp; !(a&gt;c) &amp;&amp; (b&gt;c) ==&gt; -1
+    a&gt;c       b&gt;c        3. (a&gt;b) &amp;&amp; !(a&gt;c) &amp;&amp; !(b&gt;c) ==&gt; c
+   /   \     /   \       4. !(a&gt;b) &amp;&amp; (b&gt;c) ==&gt; b
+  a    b&gt;c  b     c      5. !(a&gt;b) &amp;&amp; !(b&gt;c) ==&gt; c
+      /   \
+     -1    c
+</code></pre>
+<p>Path <em>2</em> is infeasible since (a&gt;b) &amp;&amp; !(a&gt;c) implies c&gt;b</p>
+</div>
+<div id="path-explosion" class="slide section level1">
+<h1>Path Explosion</h1>
+<p>Real world programs may contain complex constraints The number of execution paths can be infinite!</p>
+<pre><code>fact (n:Int) : Int =
+  if n == 0
+  then 1
+  else n * fact (n-1)</code></pre>
+<p>Execution tree</p>
+<pre><code>  n==0
+ /    \
+1   (n-1)==0
+    /       \
+  n*1     ((n-1)-1)==0
+          /           \
+      n*(n-1)*1        ...</code></pre>
+</div>
+<div id="the-problem-of-symbolic-execution" class="slide section level1">
+<h1>The Problem of Symbolic Execution</h1>
+<ul>
+<li><p>Path explotion</p>
+<p>Thanks to <strong>laziness</strong>, we can still construct the tree and use it as much as we need!</p></li>
+<li><p>Infeasible paths</p>
+<p>Chaos for analysing program behavior</p></li>
+</ul>
+</div>
+<div id="smt" class="slide section level1">
+<h1>SMT</h1>
+<ul>
+<li><p>Satisfiability Modulo Theory</p></li>
+<li><p>SMT = SAT++</p></li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>Uninterpreted functions</li>
+<li>Linear real and integer arithmetic</li>
+<li>Recursive datatypes</li>
+<li>Dependent types</li>
+<li>...</li>
+</ol>
+<ul>
+<li>SMT Solvers</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>Z3 (what we use)</li>
+<li>CVC4</li>
+<li>MathSAT</li>
+</ol>
+<!-- The development of SMT solver makes symbolic execution become pratical. -->
+</div>
+<div id="smt-syntax" class="slide section level1">
+<h1>SMT: Syntax</h1>
+<ul>
+<li><p>Lisp-like syntax</p>
+<ul>
+<li>(declare-const &lt;name&gt; &lt;type&gt;)</li>
+</ul>
+<p>Declare a constant of a given type</p>
+<ul>
+<li>(assert &lt;formula&gt;)</li>
+</ul>
+<p>Add a formula</p>
+<ul>
+<li>(check-sat)</li>
+</ul>
+<p>Check whether there exsits an assignment that makes all asserted formulas true</p>
+<ul>
+<li>(get-model)</li>
+</ul>
+<p>Give one particular assignment if satisfiable</p></li>
+<li><p>Standard: SMT-lib2</p></li>
+</ul>
+</div>
+<div id="smt-an-example" class="slide section level1">
+<h1>SMT: an Example</h1>
+<p>(a&gt;b) &amp;&amp; !(a&gt;c) &amp;&amp; (b&gt;c) ==&gt; -1</p>
+<p>Translate to:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">(declare-const a Int)
+(declare-const b Int)
+(declare-const c Int)
+
+(assert (<span class="kw">&gt;</span> a b))
+(assert (<span class="kw">not</span> (<span class="kw">&gt;</span> a c)))
+(assert (<span class="kw">&gt;</span> b c))
+
+(check-sat)</code></pre>
+<p>Result: unsat</p>
+</div>
+<div id="the-limitation-of-smt-solver" class="slide section level1">
+<h1>The Limitation of SMT solver</h1>
+<ul>
+<li>Its theory basis is first-order logic. Constraints containing higher-order functions can not be expressed in first-order logic</li>
+<li>Nonlinear arithmetic operations over real numbers such as <code>sin</code> and <code>log</code> are not supported</li>
+</ul>
+</div>
+<div id="smt-summary" class="slide section level1">
+<h1>SMT: Summary</h1>
+<p>What SMT Solver can bring to us</p>
+<ol style="list-style-type: decimal">
+<li>Filter out impossible paths <code>(check-sat)</code></li>
+<li>Generate counter-example <code>(get-model)</code></li>
+</ol>
+</div>
+<div id="future-work" class="slide section level1">
+<h1>Future Work</h1>
+<p>Currently, <code>if</code> is the only expression that leads to different execution path and the execution tree is just a binary tree.</p>
+<p>A more general case (in functional languages) is pattern matching, which allows multiple entries. In other words, the execution tree will be a normal tree.</p>
+</div>
+<div id="related-work" class="slide section level1">
+<h1>Related Work</h1>
+<ul>
+<li>Smallcheck and lazy smallcheck: automatic exhaustive testing for small values</li>
+<li>Relatively Complete Counterexamples for Higher-Order Programs</li>
+</ul>
+</div>
+<div id="reference" class="slide section level1">
+<h1>Reference</h1>
+<ul>
+<li>An orchestrated survey of methodologies for automated software test case generation</li>
+<li>Abstract syntax graphs for domain specific languages</li>
+<li>Z3 tutorial: http://rise4fun.com/z3/tutorial</li>
+</ul>
+</div>
+</body>
+</html>
