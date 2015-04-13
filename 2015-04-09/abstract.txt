@@ -1,0 +1,18 @@
+Title: Implement a dependently typed core language in Haskell
+
+Speaker: Linus
+
+Data & Time: Thursday, 9 April, 2015 1:45 pm
+
+Venue: CB 313
+
+Abstract:
+
+Dependent types bring extra power and expressibility to the
+traditional type system but also increase the complexity of
+implementation. We present a simple implementation in Haskell of a
+dependently typed core language by using bidirectional type
+inference. We first show how to implement a simply typed lambda
+calculus and expand its typing rules that are necessary for dependent
+types. We also write some examples of dependent data types for
+executing on top of an interpreter with parser and pretty printer.
